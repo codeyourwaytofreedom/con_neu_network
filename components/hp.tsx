@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import hp from "../styles/Hp.module.css";
 import * as tf from "@tensorflow/tfjs";
 import { GraphModel } from "@tensorflow/tfjs";
@@ -19,12 +19,34 @@ const Hp = () => {
     let trainingDataOutputs = [];
     let example_count = [];
     let predict = false;
+    let class_names = [];
 
 
     const loadMobilNetFeatureModel = async () =>{
         const URL = "https://tfhub.dev/google/tfjs-model/imagenet/mobilenet_v3_small_100_224/feature_vector/5/default/1";
-        await tf.loadGraphModel(URL, {fromTFHub:true}).then(mod => setMobileNet(mod))
+        const mb = await tf.loadGraphModel(URL, {fromTFHub:true});
+        if(!mobilnet){
+            setMobileNet(mb);
+        }
+        tf.tidy(function(){
+            let answer:any =  mb?.predict(tf.zeros([1,MN_INPUT_HEI,MN_INPUT_WID,3]));
+            console.log(answer.shape)
+        })
     }
+
+    useEffect(()=>{
+        let model = tf.sequential();
+        model.add(tf.layers.dense({inputShape:[1024],units:128,activation:"relu"}));
+        model.add(tf.layers.dense({units:2,activation:"softmax"}));
+        model.summary();
+
+        model.compile({
+            optimizer:"adam",
+            loss:(class_names.length === 2) ? "binaryCrossentropy" : "categoricalCrossentropy",
+            metrics:["accuracy"]
+
+        });
+    },[])
 
     return ( 
         <>

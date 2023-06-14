@@ -1,10 +1,31 @@
 .frame{
-    display: grid;
-    video{
-        width: 500px;
-        height: 500px;
-        background: orange;
+    &_main{
+        height: 100vh;
+        background-color: black;
+        padding: 100px 50px;
+        display: flex;
+        column-gap: 5%;
+        video{
+            width: 500px;
+            height: 500px;
+            background: orange;
+        }
+        &_board{
+            border: 3px solid burlywood;
+            height: 500px;
+            width: 55%;
+            background-image: url("../public/board.jpg");
+            background-repeat: no-repeat;
+            background-size: cover;
+            display: grid;
+            justify-content: start;
+            align-items: center;
+            padding: 40px;
+            font-size: 60px;
+            color: whitesmoke;
+        }
     }
+
     h1{
         color:red;
     }

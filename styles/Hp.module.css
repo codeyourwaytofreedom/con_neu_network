@@ -1,10 +1,29 @@
-.frame {
-  display: grid;
+.frame_main {
+  height: 100vh;
+  background-color: black;
+  padding: 100px 50px;
+  display: flex;
+  -moz-column-gap: 5%;
+       column-gap: 5%;
 }
-.frame video {
+.frame_main video {
   width: 500px;
   height: 500px;
   background: orange;
+}
+.frame_main_board {
+  border: 3px solid burlywood;
+  height: 500px;
+  width: 55%;
+  background-image: url("../public/board.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  display: grid;
+  justify-content: start;
+  align-items: center;
+  padding: 40px;
+  font-size: 60px;
+  color: whitesmoke;
 }
 .frame h1 {
   color: red;

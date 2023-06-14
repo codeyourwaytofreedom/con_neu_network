@@ -2,6 +2,7 @@ import { use, useEffect, useRef, useState } from "react";
 import hp from "../styles/Hp.module.css";
 import * as tf from "@tensorflow/tfjs";
 import { GraphModel, model } from "@tensorflow/tfjs";
+import Image from "next/image";
 
 
 const Hp = () => {
@@ -21,11 +22,11 @@ const Hp = () => {
 
     const [example_count,setExample_count] = useState<any[]>([
         {
-            name:"gather1",
+            name:"Interval",
             count:0
         },
         {
-            name:"gather2",
+            name:"1",
             count:0
         },
     ]);
@@ -106,8 +107,6 @@ const Hp = () => {
             const animID = window.requestAnimationFrame(dataGatherLoop);
             animationFrameIdRef.current = animID;
 
-            /* let animID = window.requestAnimationFrame(dataGatherLoop);
-            setAnimFrame(animID); */
         }
     }
 
@@ -168,7 +167,7 @@ const Hp = () => {
         console.log(ep,logs)
     }
 
-    const [result,setResult] = useState("");
+    const [result,setResult] = useState<any>();
 
     const predictLoop = () => {
         if(predict){
@@ -180,20 +179,34 @@ const Hp = () => {
                 let heighestIndex = prediction.argMax().arraySync();
                 let predictionArray = prediction.arraySync();
 
-                console.log(class_names[heighestIndex], "için tahmin : ", predictionArray[heighestIndex]);
-                setResult("Sonuç:" + class_names[heighestIndex] + " "+predictionArray[heighestIndex]*100)
+                setResult({
+                    name:class_names[heighestIndex],
+                    ratio:predictionArray[heighestIndex]*100
+                });                
+                
             });
         }
         window.requestAnimationFrame(predictLoop);
     }
 
+    const [last_number, setLast] = useState();
+    useEffect(()=>{
+
+    },[result])
+
     return ( 
         <>
             <div className={hp.frame}>
-                <video autoPlay ref={VIDEO} onLoadedData={()=> setVidPlaying(true)}/>
+                <div className={hp.frame_main}>
+                    <video autoPlay ref={VIDEO} onLoadedData={()=> setVidPlaying(true)}/>
+                    <div className={hp.frame_main_board}>
+                            76*34=
+                    </div>
+                </div>
+                
                 <button ref={ENABLE_CAM_BUTTON} onClick={enableCam}>Open Cam</button>
-                <button data-1hot = {0} data-name={"Group 1"} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)} onMouseLeave={()=> setGatherDataState(-1)}>GAther1</button>
-                <button data-1hot = {1} data-name={"Group 2"} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)} onMouseLeave={()=> setGatherDataState(-1)}>GAther2</button>
+                <button data-1hot = {0} data-name={"Group 1"} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)}>Default</button>
+                <button data-1hot = {1} data-name={"Group 2"} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)}>Number 1</button>
 
                 <button onClick={trainAndPredict}>Train & Predict</button>
 
@@ -201,7 +214,7 @@ const Hp = () => {
                 <h1>{example_count[0].name}: {example_count[0].count}</h1>
                 <h1>{example_count[1].name}: {example_count[1].count}</h1>
 
-                <h1>{result}</h1>
+                <h1>{result && result.name} - {result && result.ratio}</h1>
             </div>
         </>
      );

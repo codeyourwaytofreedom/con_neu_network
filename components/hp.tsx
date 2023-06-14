@@ -1,7 +1,7 @@
 import { use, useEffect, useRef, useState } from "react";
 import hp from "../styles/Hp.module.css";
 import * as tf from "@tensorflow/tfjs";
-import { GraphModel } from "@tensorflow/tfjs";
+import { GraphModel, model } from "@tensorflow/tfjs";
 
 
 const Hp = () => {
@@ -30,11 +30,12 @@ const Hp = () => {
         },
     ]);
 
-    let class_names = [];
+    let class_names = ["gather 1", "gather 2"];
 
-    let predict = false;
+    const [predict, setPredict] = useState(false);
 
     const animationFrameIdRef = useRef<number>();
+    const [model, setModel] = useState<any>();
 
     
     const [animation_frame, setAnimFrame] = useState<any>();
@@ -127,33 +128,80 @@ const Hp = () => {
         console.log(example_count)
     },[gatherDataState])
 
-/* 
-    useEffect(()=>{
-        let model = tf.sequential();
-        model.add(tf.layers.dense({inputShape:[1024],units:128,activation:"relu"}));
-        model.add(tf.layers.dense({units:2,activation:"softmax"}));
-        model.summary();
 
-        model.compile({
+    useEffect(()=>{
+        let modd = tf.sequential();
+        modd.add(tf.layers.dense({inputShape:[1024],units:128,activation:"relu"}));
+        modd.add(tf.layers.dense({units:2,activation:"softmax"}));
+        modd.summary();
+
+        modd.compile({
             optimizer:"adam",
             loss:(class_names.length === 2) ? "binaryCrossentropy" : "categoricalCrossentropy",
             metrics:["accuracy"]
         });
-    },[]) */
+        setModel(modd);
+    },[])
+
+    const trainAndPredict = async () =>{
+        tf.util.shuffleCombo(trainingDataInputs, trainingDataOutputs);
+        let outoutAsTensor = tf.tensor1d(trainingDataOutputs, "int32");
+        let oneHotOutputs = tf.oneHot(outoutAsTensor, class_names.length);
+        let inputasTensor = tf.stack(trainingDataInputs);
+
+        let results = await model.fit(inputasTensor, oneHotOutputs,{
+            shuffle:true,
+            batchSize:5,
+            epochs:10,
+            callbacks:{onEpochEnd: logProgress}
+        })
+
+        outoutAsTensor.dispose();
+        oneHotOutputs.dispose();
+        inputasTensor.dispose();
+
+        setPredict(true);
+        predictLoop();
+    }
+
+    const logProgress = (ep:any, logs:any) =>{
+        console.log(ep,logs)
+    }
+
+    const [result,setResult] = useState("");
+
+    const predictLoop = () => {
+        if(predict){
+            tf.tidy(()=>{
+                let videoFrameAsTensor = tf.browser.fromPixels(VIDEO.current!).div(2555);
+                let resized_Tensor_Frame = tf.image.resizeBilinear(videoFrameAsTensor as any,[MN_INPUT_HEI,MN_INPUT_WID],true);
+                let image_features = mobilnet?.predict(resized_Tensor_Frame.expandDims());
+                let prediction = model.predict(image_features).squeeze();
+                let heighestIndex = prediction.argMax().arraySync();
+                let predictionArray = prediction.arraySync();
+
+                console.log(class_names[heighestIndex], "için tahmin : ", predictionArray[heighestIndex]);
+                setResult("Sonuç:" + class_names[heighestIndex] + " "+predictionArray[heighestIndex]*100)
+            });
+        }
+        window.requestAnimationFrame(predictLoop);
+    }
 
     return ( 
         <>
             <div className={hp.frame}>
-                <h1>Hello CNN</h1>
                 <video autoPlay ref={VIDEO} onLoadedData={()=> setVidPlaying(true)}/>
                 <button ref={ENABLE_CAM_BUTTON} onClick={enableCam}>Open Cam</button>
                 <button data-1hot = {0} data-name={"Group 1"} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)} onMouseLeave={()=> setGatherDataState(-1)}>GAther1</button>
                 <button data-1hot = {1} data-name={"Group 2"} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)} onMouseLeave={()=> setGatherDataState(-1)}>GAther2</button>
 
-                <button ref={TRAIN_BUTTON}>XXX</button>
-                <button>Train & Predict</button>
+                <button onClick={trainAndPredict}>Train & Predict</button>
 
                 <h1>{gatherDataState}</h1>
+                <h1>{example_count[0].name}: {example_count[0].count}</h1>
+                <h1>{example_count[1].name}: {example_count[1].count}</h1>
+
+                <h1>{result}</h1>
             </div>
         </>
      );

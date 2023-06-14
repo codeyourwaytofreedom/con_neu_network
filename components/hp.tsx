@@ -14,14 +14,28 @@ const Hp = () => {
 
     const [mobilnet, setMobileNet] = useState<GraphModel>();
     const [gatherDataState,setGatherDataState] = useState(STOP_DATA_GATHER);
+
     const [videoPlaying,setVidPlaying] = useState(false);
     const [trainingDataInputs,setTrainingDataInputs] = useState<any>([]);
     const [trainingDataOutputs,setTrainingDataOutputs] = useState<any>([]);
 
-    const [example_count,setExample_count] = useState<number>();
+    const [example_count,setExample_count] = useState<any[]>([
+        {
+            name:"gather1",
+            count:0
+        },
+        {
+            name:"gather2",
+            count:0
+        },
+    ]);
+
     let class_names = [];
 
     let predict = false;
+
+    const animationFrameIdRef = useRef<number>();
+
     
     const [animation_frame, setAnimFrame] = useState<any>();
 
@@ -37,7 +51,10 @@ const Hp = () => {
         })
     }
     
-    loadMobilNetFeatureModel();
+    
+    useEffect(()=>{
+        loadMobilNetFeatureModel();
+    },[])
 
     const hasGetUserMedia = () =>{
         return !! (navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
@@ -72,11 +89,24 @@ const Hp = () => {
             setTrainingDataInputs([...trainingDataInputs,image_features]);
             setTrainingDataOutputs([...trainingDataOutputs, gatherDataState]);
 
-            console.log(image_features)
+            console.log(image_features);
 
+            setExample_count(prevState => (
+                prevState.map((item, index) => {
+                  if (index === gatherDataState) {
+                    return {
+                      ...item,
+                      count: item.count + 1
+                    };
+                  }
+                  return item;
+                })
+              ));
+            const animID = window.requestAnimationFrame(dataGatherLoop);
+            animationFrameIdRef.current = animID;
 
-            let animID = window.requestAnimationFrame(dataGatherLoop);
-            setAnimFrame(animID);
+            /* let animID = window.requestAnimationFrame(dataGatherLoop);
+            setAnimFrame(animID); */
         }
     }
 
@@ -90,8 +120,11 @@ const Hp = () => {
             dataGatherLoop();
         }
         else{
-                window.cancelAnimationFrame(animation_frame);
+            if (animationFrameIdRef.current) {
+                window.cancelAnimationFrame(animationFrameIdRef.current);
+              }
         }
+        console.log(example_count)
     },[gatherDataState])
 
 /* 
@@ -114,11 +147,11 @@ const Hp = () => {
                 <h1>Hello CNN</h1>
                 <video autoPlay ref={VIDEO} onLoadedData={()=> setVidPlaying(true)}/>
                 <button ref={ENABLE_CAM_BUTTON} onClick={enableCam}>Open Cam</button>
-                <button data-1hot = {0} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)} onMouseLeave={()=> setGatherDataState(-1)}>GAther1</button>
+                <button data-1hot = {0} data-name={"Group 1"} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)} onMouseLeave={()=> setGatherDataState(-1)}>GAther1</button>
+                <button data-1hot = {1} data-name={"Group 2"} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)} onMouseLeave={()=> setGatherDataState(-1)}>GAther2</button>
 
                 <button ref={TRAIN_BUTTON}>XXX</button>
                 <button>Train & Predict</button>
-                <h1>{example_count && example_count}</h1>
 
                 <h1>{gatherDataState}</h1>
             </div>

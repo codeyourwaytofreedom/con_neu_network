@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import hp from "../styles/Hp.module.css";
 import * as tf from "@tensorflow/tfjs";
 import { GraphModel } from "@tensorflow/tfjs";
@@ -18,11 +18,12 @@ const Hp = () => {
     const [trainingDataInputs,setTrainingDataInputs] = useState<any>([]);
     const [trainingDataOutputs,setTrainingDataOutputs] = useState<any>([]);
 
-    const [example_count,setExample_count] = useState<any>([]);
-
-    let predict = false;
+    const [example_count,setExample_count] = useState<number>();
     let class_names = [];
 
+    let predict = false;
+    
+    const [animation_frame, setAnimFrame] = useState<any>();
 
     const loadMobilNetFeatureModel = async () =>{
         const URL = "https://tfhub.dev/google/tfjs-model/imagenet/mobilenet_v3_small_100_224/feature_vector/5/default/1";
@@ -35,6 +36,8 @@ const Hp = () => {
             console.log(answer.shape)
         })
     }
+    
+    loadMobilNetFeatureModel();
 
     const hasGetUserMedia = () =>{
         return !! (navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
@@ -54,11 +57,6 @@ const Hp = () => {
         }
     }
 
-    const gatherDataforClass = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        const classNumber = parseInt(event.currentTarget.getAttribute('data-1hot')!);
-        setGatherDataState(gatherDataState === STOP_DATA_GATHER ? classNumber : STOP_DATA_GATHER)
-        dataGatherLoop();
-    };
       
     const dataGatherLoop = () => {
         if(videoPlaying && gatherDataState !== STOP_DATA_GATHER){
@@ -66,19 +64,37 @@ const Hp = () => {
                 let videoFrameasTensor = tf.browser.fromPixels(VIDEO.current!);
                 let resized_Tensor_Frame = tf.image.resizeBilinear(videoFrameasTensor,[MN_INPUT_HEI,MN_INPUT_WID],true);
                 let normalizedTensorFrame = resized_Tensor_Frame.div(255);
-                return mobilnet!.predict(normalizedTensorFrame.expandDims().squeeze()); //could be an issue here. double check
+                return mobilnet?.predict(normalizedTensorFrame.expandDims()).squeeze(); //could be an issue here. double check
             });
+            
+            console.log("here");
 
             setTrainingDataInputs([...trainingDataInputs,image_features]);
             setTrainingDataOutputs([...trainingDataOutputs, gatherDataState]);
 
-/*             if(example_count[gatherDataState] === undefined){
-                example_count[gatherDataState] = 0;
-            } */
+            console.log(image_features)
 
-            window.requestAnimationFrame(dataGatherLoop)
+
+            let animID = window.requestAnimationFrame(dataGatherLoop);
+            setAnimFrame(animID);
         }
     }
+
+    const gatherDataforClass = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        const classNumber = parseInt(event.currentTarget.getAttribute('data-1hot')!);
+        setGatherDataState(classNumber);       
+    };
+
+    useEffect(()=>{
+        if(videoPlaying && gatherDataState !== STOP_DATA_GATHER){
+            dataGatherLoop();
+        }
+        else{
+                window.cancelAnimationFrame(animation_frame);
+        }
+    },[gatherDataState])
+
+/* 
     useEffect(()=>{
         let model = tf.sequential();
         model.add(tf.layers.dense({inputShape:[1024],units:128,activation:"relu"}));
@@ -90,18 +106,21 @@ const Hp = () => {
             loss:(class_names.length === 2) ? "binaryCrossentropy" : "categoricalCrossentropy",
             metrics:["accuracy"]
         });
-    },[])
+    },[]) */
 
     return ( 
         <>
             <div className={hp.frame}>
                 <h1>Hello CNN</h1>
                 <video autoPlay ref={VIDEO} onLoadedData={()=> setVidPlaying(true)}/>
-                <button data-1hot = {0} ref={ENABLE_CAM_BUTTON} onClick={enableCam}>Open Cam</button>
-                <button data-1hot = {0} onClick={gatherDataforClass}>GAther1</button>
-                <button data-1hot = {1} onClick={gatherDataforClass}>Gather2</button>
+                <button ref={ENABLE_CAM_BUTTON} onClick={enableCam}>Open Cam</button>
+                <button data-1hot = {0} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)} onMouseLeave={()=> setGatherDataState(-1)}>GAther1</button>
+
                 <button ref={TRAIN_BUTTON}>XXX</button>
                 <button>Train & Predict</button>
+                <h1>{example_count && example_count}</h1>
+
+                <h1>{gatherDataState}</h1>
             </div>
         </>
      );

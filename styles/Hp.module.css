@@ -25,6 +25,10 @@
   font-size: 60px;
   color: whitesmoke;
 }
+.frame_controls {
+  display: flex;
+  justify-content: flex-end;
+}
 .frame h1 {
   color: red;
 }/*# sourceMappingURL=Hp.module.css.map */

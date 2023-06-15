@@ -31,7 +31,7 @@ const Hp = () => {
         },
     ]);
 
-    let class_names = ["gather 1", "gather 2"];
+    let class_names = ["default", "1"];
 
     const [predict, setPredict] = useState(false);
 
@@ -191,8 +191,19 @@ const Hp = () => {
 
     const [last_number, setLast] = useState();
     useEffect(()=>{
-
+        if(result){
+            setLast(result.name);
+        }
     },[result])
+
+    const [ins, setIns] = useState<any>([]);
+    useEffect(()=>{
+        if(last_number !== "default"){
+            setTimeout(() => {
+                setIns([...ins,last_number])
+            }, 1500);
+        }
+    },[last_number]);
 
     return ( 
         <>
@@ -200,21 +211,33 @@ const Hp = () => {
                 <div className={hp.frame_main}>
                     <video autoPlay ref={VIDEO} onLoadedData={()=> setVidPlaying(true)}/>
                     <div className={hp.frame_main_board}>
-                            76*34=
+                            {last_number && last_number} <br />
+                            <div>
+                            {
+                                ins.map((e:any,i:any)=>
+                                    <span key={i}>{e}</span>
+                                )
+                            }
+                            </div>
                     </div>
                 </div>
+
+                <div className={hp.frame_controls}>
+                    <button ref={ENABLE_CAM_BUTTON} onClick={enableCam}>Open Cam</button>
+                    <button data-1hot = {0} data-name={"Group 1"} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)}>Default</button>
+                    <button data-1hot = {1} data-name={"Group 2"} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)}>Sample 1</button>
+                    <button onClick={trainAndPredict}>Train & Predict</button>
+
+                    <div>
+                        <h1>{gatherDataState}</h1>
+                        <h1>{example_count[0].name}: {example_count[0].count}</h1>
+                        <h1>{example_count[1].name}: {example_count[1].count}</h1>
+                        <h1>{result && result.name} - {result && result.ratio}</h1>
+                    </div>
+
+                </div>
                 
-                <button ref={ENABLE_CAM_BUTTON} onClick={enableCam}>Open Cam</button>
-                <button data-1hot = {0} data-name={"Group 1"} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)}>Default</button>
-                <button data-1hot = {1} data-name={"Group 2"} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)}>Number 1</button>
 
-                <button onClick={trainAndPredict}>Train & Predict</button>
-
-                <h1>{gatherDataState}</h1>
-                <h1>{example_count[0].name}: {example_count[0].count}</h1>
-                <h1>{example_count[1].name}: {example_count[1].count}</h1>
-
-                <h1>{result && result.name} - {result && result.ratio}</h1>
             </div>
         </>
      );

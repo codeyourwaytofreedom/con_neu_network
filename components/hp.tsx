@@ -29,9 +29,17 @@ const Hp = () => {
             name:"1",
             count:0
         },
+        {
+            name:"2",
+            count:0
+        },
+        {
+            name:"*",
+            count:0
+        }
     ]);
 
-    let class_names = ["default", "1"];
+    let class_names = ["default", "1","2","*"];
 
     const [predict, setPredict] = useState(false);
 
@@ -131,12 +139,12 @@ const Hp = () => {
     useEffect(()=>{
         let modd = tf.sequential();
         modd.add(tf.layers.dense({inputShape:[1024],units:128,activation:"relu"}));
-        modd.add(tf.layers.dense({units:2,activation:"softmax"}));
+        modd.add(tf.layers.dense({units:4,activation:"softmax"}));
         modd.summary();
 
         modd.compile({
             optimizer:"adam",
-            loss:(class_names.length === 2) ? "binaryCrossentropy" : "categoricalCrossentropy",
+            loss:(class_names.length === 4) ? "binaryCrossentropy" : "categoricalCrossentropy",
             metrics:["accuracy"]
         });
         setModel(modd);
@@ -226,12 +234,19 @@ const Hp = () => {
                     <button ref={ENABLE_CAM_BUTTON} onClick={enableCam}>Open Cam</button>
                     <button data-1hot = {0} data-name={"Group 1"} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)}>Default</button>
                     <button data-1hot = {1} data-name={"Group 2"} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)}>Sample 1</button>
+                    <button data-1hot = {2} data-name={"Group 2"} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)}>Sample 2</button>
+                    <button data-1hot = {3} data-name={"Group 2"} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)}>Sample +</button>
+
+
                     <button onClick={trainAndPredict}>Train & Predict</button>
 
                     <div>
                         <h1>{gatherDataState}</h1>
                         <h1>{example_count[0].name}: {example_count[0].count}</h1>
                         <h1>{example_count[1].name}: {example_count[1].count}</h1>
+                        <h1>{example_count[2].name}: {example_count[2].count}</h1>
+                        <h1>{example_count[3].name}: {example_count[3].count}</h1>
+
                         <h1>{result && result.name} - {result && result.ratio}</h1>
                     </div>
 

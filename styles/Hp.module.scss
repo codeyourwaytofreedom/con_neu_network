@@ -1,8 +1,8 @@
 .frame{
     &_main{
-        height: 100vh;
         background-color: black;
         padding: 100px 50px;
+        padding-bottom: 0;
         display: flex;
         column-gap: 5%;
         video{
@@ -28,7 +28,14 @@
     
     &_controls{
         display: flex;
-        justify-content: flex-end;
+        button{
+            width: 120px;
+            font-size: large;
+        }
+    }
+    &_checks{
+        display: flex;
+        column-gap: 10px;
     }
 
     h1{

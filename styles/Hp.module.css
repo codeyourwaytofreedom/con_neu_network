@@ -1,7 +1,7 @@
 .frame_main {
-  height: 100vh;
   background-color: black;
   padding: 100px 50px;
+  padding-bottom: 0;
   display: flex;
   -moz-column-gap: 5%;
        column-gap: 5%;
@@ -27,7 +27,15 @@
 }
 .frame_controls {
   display: flex;
-  justify-content: flex-end;
+}
+.frame_controls button {
+  width: 120px;
+  font-size: large;
+}
+.frame_checks {
+  display: flex;
+  -moz-column-gap: 10px;
+       column-gap: 10px;
 }
 .frame h1 {
   color: red;

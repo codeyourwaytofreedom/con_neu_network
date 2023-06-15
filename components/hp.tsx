@@ -25,21 +25,13 @@ const Hp = () => {
             name:"Interval",
             count:0
         },
-        {
-            name:"1",
-            count:0
-        },
-        {
-            name:"2",
-            count:0
-        },
-        {
-            name:"*",
-            count:0
-        }
+        { name:"0", count:0}, { name:"1", count:0},{ name:"2", count:0},{ name:"3", count:0},
+        { name:"4", count:0},{ name:"5", count:0},{ name:"6", count:0},{ name:"7", count:0},
+        { name:"8", count:0},{ name:"9", count:0},
+
     ]);
 
-    let class_names = ["default", "1","2","*"];
+    let class_names = ["default", "0","1","2","3","4","5","6","7","8","9"];
 
     const [predict, setPredict] = useState(false);
 
@@ -135,16 +127,16 @@ const Hp = () => {
         console.log(example_count)
     },[gatherDataState])
 
-
+    const volume = 11;
     useEffect(()=>{
         let modd = tf.sequential();
-        modd.add(tf.layers.dense({inputShape:[1024],units:128,activation:"relu"}));
-        modd.add(tf.layers.dense({units:4,activation:"softmax"}));
+        modd.add(tf.layers.dense({inputShape:[1024],units:928,activation:"relu"}));
+        modd.add(tf.layers.dense({units:volume,activation:"softmax"}));
         modd.summary();
 
         modd.compile({
             optimizer:"adam",
-            loss:(class_names.length === 4) ? "binaryCrossentropy" : "categoricalCrossentropy",
+            loss:(class_names.length === volume) ? "binaryCrossentropy" : "categoricalCrossentropy",
             metrics:["accuracy"]
         });
         setModel(modd);
@@ -206,6 +198,9 @@ const Hp = () => {
 
     const [ins, setIns] = useState<any>([]);
     useEffect(()=>{
+        if(last_number === "default"){
+            return;
+        }
         if(last_number !== "default"){
             setTimeout(() => {
                 setIns([...ins,last_number])
@@ -232,25 +227,33 @@ const Hp = () => {
 
                 <div className={hp.frame_controls}>
                     <button ref={ENABLE_CAM_BUTTON} onClick={enableCam}>Open Cam</button>
-                    <button data-1hot = {0} data-name={"Group 1"} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)}>Default</button>
-                    <button data-1hot = {1} data-name={"Group 2"} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)}>Sample 1</button>
-                    <button data-1hot = {2} data-name={"Group 2"} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)}>Sample 2</button>
-                    <button data-1hot = {3} data-name={"Group 2"} onMouseDown={gatherDataforClass} onMouseUp={()=> setGatherDataState(-1)}>Sample +</button>
+                    <button data-1hot = {0} data-name={"Group 1"} onMouseDown={gatherDataforClass} 
+                        onMouseUp={()=> setGatherDataState(-1)}>Default</button>
 
+                    {
+                        [...Array(10)].map((e,i)=>
+                        <button data-1hot = {i+1} onMouseDown={gatherDataforClass} 
+                        onMouseUp={()=> setGatherDataState(-1)}>------{i}------</button>
+                        
+                        )
+                    }
 
+                    
                     <button onClick={trainAndPredict}>Train & Predict</button>
 
-                    <div>
-                        <h1>{gatherDataState}</h1>
-                        <h1>{example_count[0].name}: {example_count[0].count}</h1>
-                        <h1>{example_count[1].name}: {example_count[1].count}</h1>
-                        <h1>{example_count[2].name}: {example_count[2].count}</h1>
-                        <h1>{example_count[3].name}: {example_count[3].count}</h1>
+                </div>
+                <div className={hp.frame_checks}>
+{/*                         <h1>{gatherDataState}</h1>
+ */}                        
+ 
+                        {
+                            example_count.map((e,i)=>
+                            <h1 key={i}>{e.name}: {e.count}</h1>
+                            )
+                        }
 
                         <h1>{result && result.name} - {result && result.ratio}</h1>
                     </div>
-
-                </div>
                 
 
             </div>

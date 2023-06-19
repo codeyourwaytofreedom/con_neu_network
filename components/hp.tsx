@@ -130,7 +130,7 @@ const Hp = () => {
     const volume = 8;
     useEffect(()=>{
         let modd = tf.sequential();
-        modd.add(tf.layers.dense({inputShape:[1024],units:900,activation:"relu"}));
+        modd.add(tf.layers.dense({inputShape:[1024],units:1150,activation:"relu"}));
         modd.add(tf.layers.dense({units:volume,activation:"softmax"}));
         modd.summary();
 
@@ -179,14 +179,12 @@ const Hp = () => {
                 let heighestIndex = prediction.argMax().arraySync();
                 let predictionArray = prediction.arraySync();
 
-                if(predictionArray[heighestIndex]*100 > 60){
+                if(predictionArray[heighestIndex]*100 > 70){
                     setResult({
                     name:class_names[heighestIndex],
                     ratio:predictionArray[heighestIndex]*100
                 });  
                 }
-                              
-                
             });
         }
         window.requestAnimationFrame(predictLoop);

@@ -26,12 +26,12 @@ const Hp = () => {
             count:0
         },
         { name:"0", count:0}, { name:"1", count:0},{ name:"2", count:0},{ name:"3", count:0},
-         { name:"4", count:0}, { name:"5", count:0} ,{ name:"6", count:0}/* ,{ name:"7", count:0},
-        { name:"8", count:0},{ name:"9", count:0}, */
+         { name:"4", count:0}, { name:"5", count:0} ,{ name:"6", count:0},{ name:"7", count:0},
+        { name:"8", count:0},{ name:"9", count:0},
 
     ]);
 
-    let class_names = ["default", "0","1","2","3","4","5", "6"/* ,"7","8","9" */];
+    let class_names = ["default", "0","1","2","3","4","5", "6","7","8","9"];
 
     const [predict, setPredict] = useState(false);
 
@@ -127,10 +127,10 @@ const Hp = () => {
         console.log(example_count)
     },[gatherDataState])
 
-    const volume = 8;
+    const volume = 11;
     useEffect(()=>{
         let modd = tf.sequential();
-        modd.add(tf.layers.dense({inputShape:[1024],units:1150,activation:"relu"}));
+        modd.add(tf.layers.dense({inputShape:[1024],units:1950,activation:"relu"}));
         modd.add(tf.layers.dense({units:volume,activation:"softmax"}));
         modd.summary();
 
@@ -150,7 +150,7 @@ const Hp = () => {
 
         let results = await model.fit(inputasTensor, oneHotOutputs,{
             shuffle:true,
-            batchSize:100,
+            batchSize:200,
             epochs:50,
             callbacks:{onEpochEnd: logProgress}
         })
@@ -179,7 +179,8 @@ const Hp = () => {
                 let heighestIndex = prediction.argMax().arraySync();
                 let predictionArray = prediction.arraySync();
 
-                if(predictionArray[heighestIndex]*100 > 70){
+                const selective_percentage = 0;
+                if(predictionArray[heighestIndex]*100 > 50){
                     setResult({
                     name:class_names[heighestIndex],
                     ratio:predictionArray[heighestIndex]*100
@@ -198,7 +199,7 @@ const Hp = () => {
     },[result])
 
     const [ins, setIns] = useState<any>([]);
-    useEffect(()=>{
+/*     useEffect(()=>{
         if(last_number === "default"){
             return;
         }
@@ -207,7 +208,7 @@ const Hp = () => {
                 setIns([...ins,last_number])
             }, 1500);
         }
-    },[last_number]);
+    },[last_number]); */
 
     return ( 
         <>
@@ -232,7 +233,7 @@ const Hp = () => {
                         onMouseUp={()=> setGatherDataState(-1)}>Default</button>
 
                     {
-                        [...Array(7)].map((e,i)=>
+                        [...Array(10)].map((e,i)=>
                         <button data-1hot = {i+1} onMouseDown={gatherDataforClass} 
                         onMouseUp={()=> setGatherDataState(-1)}>------{i}------</button>
                         

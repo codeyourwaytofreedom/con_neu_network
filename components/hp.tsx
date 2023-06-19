@@ -179,8 +179,11 @@ const Hp = () => {
                 let heighestIndex = prediction.argMax().arraySync();
                 let predictionArray = prediction.arraySync();
 
-                const selective_percentage = 0;
-                if(predictionArray[heighestIndex]*100 > 50){
+                const selective_percentage = class_names[heighestIndex] === "6" ? 80  
+                                            : class_names[heighestIndex] === "5" ? 75 
+                                            : 50;
+
+                if(predictionArray[heighestIndex]*100 > selective_percentage){
                     setResult({
                     name:class_names[heighestIndex],
                     ratio:predictionArray[heighestIndex]*100

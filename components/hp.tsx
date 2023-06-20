@@ -27,11 +27,12 @@ const Hp = () => {
         },
         { name:"0", count:0}, { name:"1", count:0},{ name:"2", count:0},{ name:"3", count:0},
          { name:"4", count:0}, { name:"5", count:0} ,{ name:"6", count:0},{ name:"7", count:0},
-        { name:"8", count:0},{ name:"9", count:0},
+        { name:"8", count:0},{ name:"9", count:0},{ name:"*", count:0},{ name:"+", count:0},
+        { name:"-", count:0},{ name:"/", count:0},
 
     ]);
 
-    let class_names = ["default", "0","1","2","3","4","5", "6","7","8","9"];
+    let class_names = ["default", "0","1","2","3","4","5", "6","7","8","9","*","+","-","/"];
 
     const [predict, setPredict] = useState(false);
 
@@ -127,7 +128,7 @@ const Hp = () => {
         console.log(example_count)
     },[gatherDataState])
 
-    const volume = 11;
+    const volume = 15;
     useEffect(()=>{
         let modd = tf.sequential();
         modd.add(tf.layers.dense({inputShape:[1024],units:450,activation:"relu"}));
@@ -168,6 +169,8 @@ const Hp = () => {
     }
 
     const [result,setResult] = useState<any>();
+    const _90 = ["-","+","/","*"];
+    const _80 = ["3","5"];
 
     const predictLoop = () => {
         if(predict){
@@ -178,11 +181,9 @@ const Hp = () => {
                 let prediction = model.predict(image_features).squeeze();
                 let heighestIndex = prediction.argMax().arraySync();
                 let predictionArray = prediction.arraySync();
-
-                const selective_percentage = class_names[heighestIndex] === "6" ? 70 
-                                            : class_names[heighestIndex] === "5" ? 80 
-                                            : class_names[heighestIndex] === "3" ? 60 
-                                            : 50;
+                const selective_percentage = _90.includes(class_names[heighestIndex]) ? 90 
+                                            : _80.includes(class_names[heighestIndex]) ? 80 
+                                            : 70;
 
                 if(predictionArray[heighestIndex]*100 > selective_percentage){
                     setResult({
@@ -203,16 +204,21 @@ const Hp = () => {
     },[result])
 
     const [ins, setIns] = useState<any>([]);
-/*     useEffect(()=>{
+    useEffect(()=>{
         if(last_number === "default"){
             return;
         }
         if(last_number !== "default"){
             setTimeout(() => {
-                setIns([...ins,last_number])
+                if(_90.includes(last_number!) && _90.includes(ins[ins.length-1])){
+                    setIns(ins.map((e:any,i:any)=> i === ins.length-1 ? last_number : e))
+                }
+                else{
+                    setIns([...ins,last_number])
+                }
             }, 1500);
         }
-    },[last_number]); */
+    },[last_number]);
 
     return ( 
         <>
@@ -237,9 +243,9 @@ const Hp = () => {
                         onMouseUp={()=> setGatherDataState(-1)}>Default</button>
 
                     {
-                        [...Array(10)].map((e,i)=>
+                        class_names.slice(1,class_names.length).map((e,i)=>
                         <button data-1hot = {i+1} onMouseDown={gatherDataforClass} 
-                        onMouseUp={()=> setGatherDataState(-1)}>------{i}------</button>
+                        onMouseUp={()=> setGatherDataState(-1)}>------{e}------</button>
                         
                         )
                     }
@@ -258,8 +264,9 @@ const Hp = () => {
                             )
                         }
 
-                        <h1>{result && result.name} - {result && result.ratio}</h1>
+                       <br /> <h1>{result && result.name} - {result && result.ratio}</h1>
                     </div>
+                <button onClick={()=> setIns([])}>Clear board</button>
                 
 
             </div>

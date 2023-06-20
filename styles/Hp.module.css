@@ -1,10 +1,13 @@
 .frame_main {
   background-color: black;
   padding: 100px 50px;
-  padding-bottom: 0;
   display: flex;
   -moz-column-gap: 5%;
        column-gap: 5%;
+  background-image: url("../public/algebra.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 100vh;
 }
 .frame_main video {
   width: 500px;
@@ -26,7 +29,10 @@
   color: whitesmoke;
 }
 .frame_controls {
+  position: fixed;
+  bottom: 90px;
   display: flex;
+  width: 100%;
 }
 .frame_controls button {
   width: 120px;
@@ -36,7 +42,13 @@
   display: flex;
   -moz-column-gap: 10px;
        column-gap: 10px;
+  position: fixed;
+  bottom: 20px;
+  background-color: yellow;
 }
 .frame h1 {
   color: red;
+}
+.frame button {
+  cursor: pointer;
 }/*# sourceMappingURL=Hp.module.css.map */

@@ -2,9 +2,12 @@
     &_main{
         background-color: black;
         padding: 100px 50px;
-        padding-bottom: 0;
         display: flex;
         column-gap: 5%;
+        background-image: url("../public/algebra.jpg");
+        background-repeat: no-repeat;
+        background-size: cover;
+        height: 100vh;
         video{
             width: 500px;
             height: 500px;
@@ -27,7 +30,10 @@
     }
     
     &_controls{
+        position: fixed;
+        bottom: 90px;
         display: flex;
+        width: 100%;
         button{
             width: 120px;
             font-size: large;
@@ -36,10 +42,16 @@
     &_checks{
         display: flex;
         column-gap: 10px;
+        position: fixed;
+        bottom: 20px;
+        background-color: yellow;
     }
 
     h1{
         color:red;
+    }
+    button{
+        cursor: pointer;
     }
 }
 

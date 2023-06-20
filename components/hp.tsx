@@ -22,17 +22,17 @@ const Hp = () => {
 
     const [example_count,setExample_count] = useState<any[]>([
         {
-            name:"Interval",
+            name:"Default",
             count:0
         },
         { name:"0", count:0}, { name:"1", count:0},{ name:"2", count:0},{ name:"3", count:0},
          { name:"4", count:0}, { name:"5", count:0} ,{ name:"6", count:0},{ name:"7", count:0},
         { name:"8", count:0},{ name:"9", count:0},{ name:"*", count:0},{ name:"+", count:0},
-        { name:"-", count:0},{ name:"/", count:0},
+        { name:"-", count:0},{ name:"/", count:0},{ name:"=", count:0},{ name:"cln", count:0},
 
     ]);
 
-    let class_names = ["default", "0","1","2","3","4","5", "6","7","8","9","*","+","-","/"];
+    let class_names = ["default", "0","1","2","3","4","5", "6","7","8","9","*","+","-","/","=","cln"];
 
     const [predict, setPredict] = useState(false);
 
@@ -128,7 +128,7 @@ const Hp = () => {
         console.log(example_count)
     },[gatherDataState])
 
-    const volume = 15;
+    const volume = 17;
     useEffect(()=>{
         let modd = tf.sequential();
         modd.add(tf.layers.dense({inputShape:[1024],units:450,activation:"relu"}));
@@ -201,7 +201,7 @@ const Hp = () => {
         if(result){
             setLast(result.name);
         }
-    },[result])
+    },[result]);
 
     const [ins, setIns] = useState<any>([]);
     useEffect(()=>{
@@ -212,6 +212,24 @@ const Hp = () => {
             setTimeout(() => {
                 if(_90.includes(last_number!) && _90.includes(ins[ins.length-1])){
                     setIns(ins.map((e:any,i:any)=> i === ins.length-1 ? last_number : e))
+                }
+                else if(last_number === "="){
+                    if(_90.includes(ins[ins.length-1]) || ins.length === 0 || !ins.some((item:any) => _90.includes(item))){
+                        return;
+                    }
+                    else{
+                        const united = ins.join("");
+                        const operator = ins.find((e:any)=>_90.includes(e));
+                        const first = parseInt(united.split(operator)[0]); 
+                        const second = parseInt(united.split(operator)[1]); 
+                    
+                        const rslt = operator === "*" ? first * second :
+                                     operator === "/" ? first / second :
+                                     operator === "+" ? first + second :
+                                                          first - second;
+                        
+
+                    }
                 }
                 else{
                     setIns([...ins,last_number])
@@ -245,7 +263,7 @@ const Hp = () => {
                     {
                         class_names.slice(1,class_names.length).map((e,i)=>
                         <button data-1hot = {i+1} onMouseDown={gatherDataforClass} 
-                        onMouseUp={()=> setGatherDataState(-1)}>------{e}------</button>
+                        onMouseUp={()=> setGatherDataState(-1)}> {e} </button>
                         
                         )
                     }
@@ -260,7 +278,7 @@ const Hp = () => {
  
                         {
                             example_count.map((e,i)=>
-                            <h1 key={i}>{e.name}: {e.count}</h1>
+                            <h2 key={i}>{e.name}: {e.count}</h2>
                             )
                         }
 

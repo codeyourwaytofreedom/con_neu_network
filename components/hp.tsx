@@ -130,7 +130,7 @@ const Hp = () => {
     const volume = 11;
     useEffect(()=>{
         let modd = tf.sequential();
-        modd.add(tf.layers.dense({inputShape:[1024],units:1950,activation:"relu"}));
+        modd.add(tf.layers.dense({inputShape:[1024],units:450,activation:"relu"}));
         modd.add(tf.layers.dense({units:volume,activation:"softmax"}));
         modd.summary();
 
@@ -150,7 +150,7 @@ const Hp = () => {
 
         let results = await model.fit(inputasTensor, oneHotOutputs,{
             shuffle:true,
-            batchSize:200,
+            batchSize:5,
             epochs:50,
             callbacks:{onEpochEnd: logProgress}
         })
@@ -179,8 +179,9 @@ const Hp = () => {
                 let heighestIndex = prediction.argMax().arraySync();
                 let predictionArray = prediction.arraySync();
 
-                const selective_percentage = class_names[heighestIndex] === "6" ? 80  
-                                            : class_names[heighestIndex] === "5" ? 75 
+                const selective_percentage = class_names[heighestIndex] === "6" ? 70 
+                                            : class_names[heighestIndex] === "5" ? 80 
+                                            : class_names[heighestIndex] === "3" ? 60 
                                             : 50;
 
                 if(predictionArray[heighestIndex]*100 > selective_percentage){

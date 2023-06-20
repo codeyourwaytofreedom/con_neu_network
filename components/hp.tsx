@@ -227,16 +227,23 @@ const Hp = () => {
                                      operator === "/" ? first / second :
                                      operator === "+" ? first + second :
                                                           first - second;
-                        
-
+                        setFinal(rslt)
                     }
                 }
                 else{
-                    setIns([...ins,last_number])
+                    if(_90.includes(last_number!) && ins.some((item:any) => _90.includes(item))){
+                        return
+                    }
+                    else{
+                        setIns([...ins,last_number])
+                    }
+                    
                 }
             }, 1500);
         }
     },[last_number]);
+
+    const [final_output, setFinal] = useState<number>(0);
 
     return ( 
         <>
@@ -244,14 +251,19 @@ const Hp = () => {
                 <div className={hp.frame_main}>
                     <video autoPlay ref={VIDEO} onLoadedData={()=> setVidPlaying(true)}/>
                     <div className={hp.frame_main_board}>
-                            {last_number && last_number} <br />
-                            <div>
+                        <div className={hp.frame_main_board_motto}>
+                            <Image src={"/tf.png"} alt={"tensorflow"} width={200} height={200}/>
+                            <h1>Fun Math for Kids...</h1>
+                        </div>
+                            {/* {last_number && last_number} <br /> */}
+                            <div className={hp.frame_main_board_result}>
                             {
                                 ins.map((e:any,i:any)=>
                                     <span key={i}>{e}</span>
                                 )
                             }
-                            </div>
+                            {final_output && final_output}
+                            </div>                            
                     </div>
                 </div>
 
@@ -272,10 +284,7 @@ const Hp = () => {
                     <button onClick={trainAndPredict}>Train & Predict</button>
 
                 </div>
-                <div className={hp.frame_checks}>
-{/*                         <h1>{gatherDataState}</h1>
- */}                        
- 
+                <div className={hp.frame_checks}> 
                         {
                             example_count.map((e,i)=>
                             <h2 key={i}>{e.name}: {e.count}</h2>
@@ -285,7 +294,6 @@ const Hp = () => {
                        <br /> <h1>{result && result.name} - {result && result.ratio}</h1>
                     </div>
                 <button onClick={()=> setIns([])}>Clear board</button>
-                
 
             </div>
         </>

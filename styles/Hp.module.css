@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Caveat&family=Indie+Flower&display=swap");
 .frame_main {
   background-color: black;
   padding: 100px 50px;
@@ -12,7 +13,9 @@
 .frame_main video {
   width: 500px;
   height: 500px;
-  background: orange;
+  border: 2px solid orange;
+  -o-object-fit: cover;
+     object-fit: cover;
 }
 .frame_main_board {
   border: 3px solid burlywood;
@@ -23,10 +26,35 @@
   background-size: cover;
   display: grid;
   justify-content: start;
-  align-items: center;
+  align-content: center;
   padding: 40px;
-  font-size: 60px;
+  font-size: 150px;
   color: whitesmoke;
+  position: relative;
+}
+.frame_main_board_motto {
+  height: 90px;
+  display: flex;
+  align-items: flex-end;
+  -moz-column-gap: 10px;
+       column-gap: 10px;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+}
+.frame_main_board_motto img {
+  width: 80px;
+  height: auto;
+}
+.frame_main_board_motto h1 {
+  font-size: 35px;
+  color: orange !important;
+}
+.frame_main_board_result {
+  border: 2px solid blue;
+  display: flex;
+  font-family: "Caveat", cursive;
+  font-family: "Indie Flower", cursive;
 }
 .frame_controls {
   position: fixed;

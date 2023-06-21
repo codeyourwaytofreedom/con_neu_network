@@ -1,7 +1,7 @@
 import { use, useEffect, useRef, useState } from "react";
 import hp from "../styles/Hp.module.css";
 import * as tf from "@tensorflow/tfjs";
-import { GraphModel, model } from "@tensorflow/tfjs";
+import { GraphModel, model, Tensor } from "@tensorflow/tfjs";
 import Image from "next/image";
 
 
@@ -57,7 +57,9 @@ const Hp = () => {
     
     useEffect(()=>{
         loadMobilNetFeatureModel();
-    },[])
+    },[]);
+
+
 
     const hasGetUserMedia = () =>{
         return !! (navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
@@ -87,8 +89,6 @@ const Hp = () => {
                 return mobilnet?.predict(normalizedTensorFrame.expandDims()).squeeze(); //could be an issue here. double check
             });
             
-            console.log("here");
-
             setTrainingDataInputs([...trainingDataInputs,image_features]);
             setTrainingDataOutputs([...trainingDataOutputs, gatherDataState]);
 
@@ -107,7 +107,6 @@ const Hp = () => {
               ));
             const animID = window.requestAnimationFrame(dataGatherLoop);
             animationFrameIdRef.current = animID;
-
         }
     }
 
@@ -129,36 +128,60 @@ const Hp = () => {
     },[gatherDataState])
 
     const volume = 17;
+    const [aval, setAval] = useState(false);
     useEffect(()=>{
-        let modd = tf.sequential();
-        modd.add(tf.layers.dense({inputShape:[1024],units:450,activation:"relu"}));
-        modd.add(tf.layers.dense({units:volume,activation:"softmax"}));
-        modd.summary();
-
-        modd.compile({
-            optimizer:"adam",
-            loss:(class_names.length === volume) ? "binaryCrossentropy" : "categoricalCrossentropy",
-            metrics:["accuracy"]
-        });
-        setModel(modd);
+        const load_existing_model = async () =>{
+            try{
+                const existing_model = await tf.loadLayersModel('localstorage://numbers_detector');
+                if(existing_model){
+                    setModel(existing_model);
+                    console.log("model avaiaible");
+                    setAval(true)
+                } else{
+                    return
+                }
+            }
+            catch{
+                let modd = tf.sequential();
+                modd.add(tf.layers.dense({inputShape:[1024],units:450,activation:"relu"}));
+                modd.add(tf.layers.dense({units:volume,activation:"softmax"}));
+                modd.summary();
+        
+                modd.compile({
+                    optimizer:"adam",
+                    loss:(class_names.length === volume) ? "binaryCrossentropy" : "categoricalCrossentropy",
+                    metrics:["accuracy"]
+                });
+                setModel(modd);
+            }
+        }
+        load_existing_model();
     },[])
 
     const trainAndPredict = async () =>{
-        tf.util.shuffleCombo(trainingDataInputs, trainingDataOutputs);
-        let outoutAsTensor = tf.tensor1d(trainingDataOutputs, "int32");
-        let oneHotOutputs = tf.oneHot(outoutAsTensor, class_names.length);
-        let inputasTensor = tf.stack(trainingDataInputs);
-
-        let results = await model.fit(inputasTensor, oneHotOutputs,{
-            shuffle:true,
-            batchSize:5,
-            epochs:50,
-            callbacks:{onEpochEnd: logProgress}
-        })
-
-        outoutAsTensor.dispose();
-        oneHotOutputs.dispose();
-        inputasTensor.dispose();
+        if(!aval){
+            tf.util.shuffleCombo(trainingDataInputs, trainingDataOutputs);
+            let outoutAsTensor = tf.tensor1d(trainingDataOutputs, "int32");
+            let oneHotOutputs = tf.oneHot(outoutAsTensor, class_names.length);
+            let inputasTensor = tf.stack(trainingDataInputs);
+    
+            let results = await model.fit(inputasTensor, oneHotOutputs,{
+                shuffle:true,
+                batchSize:5,
+                epochs:50,
+                callbacks:{onEpochEnd: logProgress}
+            })
+    
+            outoutAsTensor.dispose();
+            oneHotOutputs.dispose();
+            inputasTensor.dispose();
+    
+            const saveModel = async () => {
+                const saveResult = await model.save('localstorage://numbers_detector');
+                console.log('Model saved:', saveResult);
+              }
+            await saveModel();
+        }
 
         setPredict(true);
         predictLoop();
@@ -169,7 +192,7 @@ const Hp = () => {
     }
 
     const [result,setResult] = useState<any>();
-    const _90 = ["-","+","/","*"];
+    const _90 = ["-","+","/","*","cln"];
     const _80 = ["3","5"];
 
     const predictLoop = () => {
@@ -185,12 +208,12 @@ const Hp = () => {
                                             : _80.includes(class_names[heighestIndex]) ? 80 
                                             : 70;
 
-                if(predictionArray[heighestIndex]*100 > selective_percentage){
+                //if(predictionArray[heighestIndex]*100 > selective_percentage){
                     setResult({
                     name:class_names[heighestIndex],
                     ratio:predictionArray[heighestIndex]*100
                 });  
-                }
+                //}
             });
         }
         window.requestAnimationFrame(predictLoop);
@@ -234,6 +257,9 @@ const Hp = () => {
                     if(_90.includes(last_number!) && ins.some((item:any) => _90.includes(item))){
                         return
                     }
+                    else if (last_number === "cln"){
+                        setIns([]);
+                    }
                     else{
                         setIns([...ins,last_number])
                     }
@@ -243,7 +269,7 @@ const Hp = () => {
         }
     },[last_number]);
 
-    const [final_output, setFinal] = useState<number>(0);
+    const [final_output, setFinal] = useState<number>();
 
     return ( 
         <>
@@ -253,7 +279,7 @@ const Hp = () => {
                     <div className={hp.frame_main_board}>
                         <div className={hp.frame_main_board_motto}>
                             <Image src={"/tf.png"} alt={"tensorflow"} width={200} height={200}/>
-                            <h1>Fun Math for Kids...</h1>
+                            <h1>Fun Math for Kids...{trainingDataInputs ? trainingDataInputs.length : null }</h1>
                         </div>
                             {/* {last_number && last_number} <br /> */}
                             <div className={hp.frame_main_board_result}>

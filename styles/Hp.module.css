@@ -28,7 +28,7 @@
   justify-content: start;
   align-content: center;
   padding: 40px;
-  font-size: 150px;
+  font-size: 100px;
   color: whitesmoke;
   position: relative;
 }
@@ -51,7 +51,6 @@
   color: orange !important;
 }
 .frame_main_board_result {
-  border: 2px solid blue;
   display: flex;
   font-family: "Caveat", cursive;
   font-family: "Indie Flower", cursive;

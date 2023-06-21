@@ -10,6 +10,11 @@
   background-size: cover;
   height: 100vh;
 }
+.frame_main input {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+}
 .frame_main video {
   width: 500px;
   height: 500px;

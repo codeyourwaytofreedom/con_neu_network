@@ -159,7 +159,7 @@ const Hp = () => {
     },[])
 
     const trainAndPredict = async () =>{
-        if(!aval){
+        if(!aval && trainingDataInputs.length > 0){
             tf.util.shuffleCombo(trainingDataInputs, trainingDataOutputs);
             let outoutAsTensor = tf.tensor1d(trainingDataOutputs, "int32");
             let oneHotOutputs = tf.oneHot(outoutAsTensor, class_names.length);
@@ -167,7 +167,7 @@ const Hp = () => {
     
             let results = await model.fit(inputasTensor, oneHotOutputs,{
                 shuffle:true,
-                batchSize:5,
+                batchSize:90,
                 epochs:50,
                 callbacks:{onEpochEnd: logProgress}
             })
@@ -175,12 +175,6 @@ const Hp = () => {
             outoutAsTensor.dispose();
             oneHotOutputs.dispose();
             inputasTensor.dispose();
-    
-            const saveModel = async () => {
-                const saveResult = await model.save('localstorage://numbers_detector');
-                console.log('Model saved:', saveResult);
-              }
-            await saveModel();
         }
 
         setPredict(true);
@@ -191,9 +185,15 @@ const Hp = () => {
         console.log(ep,logs)
     }
 
+    const saveModel = async () => {
+        const saveResult = await model.save('localstorage://numbers_detector');
+        console.log('Model saved:', saveResult);
+      }
+
+
     const [result,setResult] = useState<any>();
     const _90 = ["-","+","/","*","cln"];
-    const _80 = ["3","5"];
+    const _80 = ["3","5","6"];
 
     const predictLoop = () => {
         if(predict){
@@ -206,7 +206,7 @@ const Hp = () => {
                 let predictionArray = prediction.arraySync();
                 const selective_percentage = _90.includes(class_names[heighestIndex]) ? 90 
                                             : _80.includes(class_names[heighestIndex]) ? 80 
-                                            : 70;
+                                            : 75;
 
                 //if(predictionArray[heighestIndex]*100 > selective_percentage){
                     setResult({
@@ -234,7 +234,7 @@ const Hp = () => {
         if(last_number !== "default"){
             setTimeout(() => {
                 if(_90.includes(last_number!) && _90.includes(ins[ins.length-1])){
-                    setIns(ins.map((e:any,i:any)=> i === ins.length-1 ? last_number : e))
+                    setIns(ins.map((e:any,i:any)=> i === ins.length-1 ? last_number : e));
                 }
                 else if(last_number === "="){
                     if(_90.includes(ins[ins.length-1]) || ins.length === 0 || !ins.some((item:any) => _90.includes(item))){
@@ -253,12 +253,12 @@ const Hp = () => {
                         setFinal(rslt)
                     }
                 }
+                else if (last_number === "cln"){
+                    setIns([]);
+                }
                 else{
                     if(_90.includes(last_number!) && ins.some((item:any) => _90.includes(item))){
                         return
-                    }
-                    else if (last_number === "cln"){
-                        setIns([]);
                     }
                     else{
                         setIns([...ins,last_number])
@@ -270,11 +270,14 @@ const Hp = () => {
     },[last_number]);
 
     const [final_output, setFinal] = useState<number>();
+    const hide = useRef<HTMLInputElement>(null);
+    const [display_controls, SetDisplay] = useState(false);
 
     return ( 
         <>
             <div className={hp.frame}>
                 <div className={hp.frame_main}>
+                    <input type="checkbox" ref={hide} onChange={()=>SetDisplay(hide.current!.checked)} />
                     <video autoPlay ref={VIDEO} onLoadedData={()=> setVidPlaying(true)}/>
                     <div className={hp.frame_main_board}>
                         <div className={hp.frame_main_board_motto}>
@@ -292,34 +295,43 @@ const Hp = () => {
                             </div>                            
                     </div>
                 </div>
+                {
+                    display_controls ? 
+                    <>
+                        <div className={hp.frame_controls}>
+                            <button ref={ENABLE_CAM_BUTTON} onClick={enableCam}>Open Cam</button>
+                            <button data-1hot = {0} data-name={"Group 1"} onMouseDown={gatherDataforClass} 
+                                onMouseUp={()=> setGatherDataState(-1)}>Default</button>
 
-                <div className={hp.frame_controls}>
-                    <button ref={ENABLE_CAM_BUTTON} onClick={enableCam}>Open Cam</button>
-                    <button data-1hot = {0} data-name={"Group 1"} onMouseDown={gatherDataforClass} 
-                        onMouseUp={()=> setGatherDataState(-1)}>Default</button>
+                            {
+                                class_names.slice(1,class_names.length).map((e,i)=>
+                                <button data-1hot = {i+1} onMouseDown={gatherDataforClass} 
+                                onMouseUp={()=> setGatherDataState(-1)}> {e} </button>
+                                
+                                )
+                            }
 
-                    {
-                        class_names.slice(1,class_names.length).map((e,i)=>
-                        <button data-1hot = {i+1} onMouseDown={gatherDataforClass} 
-                        onMouseUp={()=> setGatherDataState(-1)}> {e} </button>
-                        
-                        )
-                    }
+                            
+                            <button onClick={trainAndPredict}>Train & Predict</button>
 
-                    
-                    <button onClick={trainAndPredict}>Train & Predict</button>
+                        </div>
 
-                </div>
-                <div className={hp.frame_checks}> 
-                        {
-                            example_count.map((e,i)=>
-                            <h2 key={i}>{e.name}: {e.count}</h2>
-                            )
-                        }
+                        <div className={hp.frame_checks}> 
+                                {
+                                    example_count.map((e,i)=>
+                                    <h2 key={i}>{e.name}: {e.count}</h2>
+                                    )
+                                }
 
-                       <br /> <h1>{result && result.name} - {result && result.ratio}</h1>
-                    </div>
-                <button onClick={()=> setIns([])}>Clear board</button>
+                            <br /> <h1>{result && result.name} - {result && result.ratio}</h1>
+                        </div>
+
+                        <button onClick={()=>setIns([])}>Clear board</button>
+                        <button onClick={saveModel}>Save model</button>
+                    </>
+                    : null
+                }
+
 
             </div>
         </>

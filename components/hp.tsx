@@ -20,11 +20,8 @@ const Hp = () => {
     const [trainingDataInputs,setTrainingDataInputs] = useState<any>([]);
     const [trainingDataOutputs,setTrainingDataOutputs] = useState<any>([]);
 
-    const [example_count,setExample_count] = useState<any[]>([
-        {
-            name:"Default",
-            count:0
-        },
+/*     const [example_count,setExample_count] = useState<any[]>([
+        {name:"Default",count:0},
         { name:"0", count:0}, { name:"1", count:0},{ name:"2", count:0},{ name:"3", count:0},
          { name:"4", count:0}, { name:"5", count:0} ,{ name:"6", count:0},{ name:"7", count:0},
         { name:"8", count:0},{ name:"9", count:0},{ name:"*", count:0},{ name:"+", count:0},
@@ -32,7 +29,17 @@ const Hp = () => {
 
     ]);
 
-    let class_names = ["default", "0","1","2","3","4","5", "6","7","8","9","*","+","-","/","=","cln"];
+    let class_names = ["default", "0","1","2","3","4","5", "6","7","8","9","*","+","-","/","=","cln"]; */
+
+    const [example_count,setExample_count] = useState<any[]>([
+        {name:"Default",count:0},
+        { name:"1", count:0},{ name:"2", count:0},
+         { name:"4", count:0}, { name:"7", count:0},
+        { name:"/", count:0}
+
+    ]);
+
+    let class_names = ["default", "1","2","4","7","/"];
 
     const [predict, setPredict] = useState(false);
 
@@ -127,7 +134,7 @@ const Hp = () => {
         console.log(example_count)
     },[gatherDataState])
 
-    const volume = 17;
+    const volume = class_names.length;
     const [aval, setAval] = useState(false);
     useEffect(()=>{
         const load_existing_model = async () =>{
@@ -143,7 +150,7 @@ const Hp = () => {
             }
             catch{
                 let modd = tf.sequential();
-                modd.add(tf.layers.dense({inputShape:[1024],units:450,activation:"relu"}));
+                modd.add(tf.layers.dense({inputShape:[1024],units:950,activation:"relu"}));
                 modd.add(tf.layers.dense({units:volume,activation:"softmax"}));
                 modd.summary();
         
@@ -167,7 +174,7 @@ const Hp = () => {
     
             let results = await model.fit(inputasTensor, oneHotOutputs,{
                 shuffle:true,
-                batchSize:90,
+                batchSize:100,
                 epochs:50,
                 callbacks:{onEpochEnd: logProgress}
             })
@@ -193,7 +200,12 @@ const Hp = () => {
 
     const [result,setResult] = useState<any>();
     const _90 = ["-","+","/","*","cln"];
-    const _80 = ["3","5","6"];
+    const _70 = ["1","4"];
+    const _75 = ["/"];
+    const _80 = ["7"];
+    const _85 = ["2"];
+
+
 
     const predictLoop = () => {
         if(predict){
@@ -204,16 +216,18 @@ const Hp = () => {
                 let prediction = model.predict(image_features).squeeze();
                 let heighestIndex = prediction.argMax().arraySync();
                 let predictionArray = prediction.arraySync();
-                const selective_percentage = _90.includes(class_names[heighestIndex]) ? 90 
-                                            : _80.includes(class_names[heighestIndex]) ? 80 
-                                            : 75;
+                const selective_percentage = _85.includes(class_names[heighestIndex]) ? 85
+                                            : _80.includes(class_names[heighestIndex]) ? 80
+                                            : _75.includes(class_names[heighestIndex]) ? 75
+                                            : _70.includes(class_names[heighestIndex]) ? 70
+                                            : 55;
 
-                //if(predictionArray[heighestIndex]*100 > selective_percentage){
+                if(predictionArray[heighestIndex]*100 > selective_percentage){
                     setResult({
                     name:class_names[heighestIndex],
                     ratio:predictionArray[heighestIndex]*100
                 });  
-                //}
+                }
             });
         }
         window.requestAnimationFrame(predictLoop);

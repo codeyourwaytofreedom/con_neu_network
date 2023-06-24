@@ -271,6 +271,9 @@ const Hp = () => {
                 if(_ops.includes(last_number!) && _ops.includes(ins[ins.length-1])){
                     setIns(ins.map((e:any,i:any)=> i === ins.length-1 ? last_number : e));
                 }
+                if(_ops.includes(last_number!) && ins.length === 0){
+                    return
+                }
                 else if(last_number === "="){
                     if(_ops.includes(ins[ins.length-1]) || ins.length === 0 || !ins.some((item:any) => _ops.includes(item))){
                         return;
@@ -318,16 +321,20 @@ const Hp = () => {
                     <div className={hp.frame_main_board}>
                         <div className={hp.frame_main_board_motto}>
                             <Image src={"/tf.png"} alt={"tensorflow"} width={200} height={200}/>
-                            <h1>Fun Math for Kids...{trainingDataInputs ? trainingDataInputs.length : null }</h1>
+                            <h1>Fun Math for Kids...</h1>
                         </div>
-                            {/* {last_number && last_number} <br /> */}
+                        {
+                            last_number && last_number !== "default" ? 
+                            <div id={hp.last}>{last_number && last_number !== "default" && last_number}</div>
+                            : null
+                        }
                             <div className={hp.frame_main_board_result}>
                             {
                                 ins.map((e:any,i:any)=>
                                     <span key={i}>{e}</span>
                                 )
                             }
-                            {final_output && final_output}
+                            {final_output && '\u00A0' + "=" + '\u00A0' + final_output}
                             </div>                            
                     </div>
                 </div>

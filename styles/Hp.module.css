@@ -33,9 +33,24 @@
   justify-content: start;
   align-content: center;
   padding: 40px;
-  font-size: 100px;
+  font-size: 90px;
   color: whitesmoke;
   position: relative;
+  font-family: "Caveat", cursive;
+  font-family: "Indie Flower", cursive;
+}
+.frame_main_board #last {
+  color: white;
+  font-size: 70px;
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  border: 2px solid orange;
+  height: 90px;
+  width: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .frame_main_board_motto {
   height: 90px;

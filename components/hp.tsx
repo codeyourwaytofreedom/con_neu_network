@@ -219,9 +219,9 @@ const Hp = () => {
     
     const _95 = ["5"];
     const _85 = ["7"];
-    const _80 = ["0","6","8","*","/","+","=","cln"];
-    const _70 = ["1","2","9"];
-    const _50 = ["3","4","-"];
+    const _80 = ["0","8","*","/","+","="];
+    const _70 = ["1","2","9","6"];
+    const _50 = ["3","4","-","cln"];
 
 
 
@@ -272,7 +272,7 @@ const Hp = () => {
                     setIns(ins.map((e:any,i:any)=> i === ins.length-1 ? last_number : e));
                 }
                 else if(last_number === "="){
-                    if(_ops.includes(ins[ins.length-1]) || ins.length === 0 || !ins.some((item:any) => _90.includes(item))){
+                    if(_ops.includes(ins[ins.length-1]) || ins.length === 0 || !ins.some((item:any) => _ops.includes(item))){
                         return;
                     }
                     else{
@@ -290,6 +290,7 @@ const Hp = () => {
                 }
                 else if (last_number === "cln"){
                     setIns([]);
+                    setFinal(null)
                 }
                 else{
                     if(_ops.includes(last_number!) && ins.some((item:any) => _ops.includes(item))){
@@ -304,7 +305,7 @@ const Hp = () => {
         }
     },[last_number]);
 
-    const [final_output, setFinal] = useState<number>();
+    const [final_output, setFinal] = useState<any>();
     const hide = useRef<HTMLInputElement>(null);
     const [display_controls, SetDisplay] = useState(false);
 
@@ -326,7 +327,7 @@ const Hp = () => {
                                     <span key={i}>{e}</span>
                                 )
                             }
-                            {/* {final_output && final_output} */}
+                            {final_output && final_output}
                             </div>                            
                     </div>
                 </div>

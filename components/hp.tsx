@@ -20,7 +20,7 @@ const Hp = () => {
     const [trainingDataInputs,setTrainingDataInputs] = useState<any>([]);
     const [trainingDataOutputs,setTrainingDataOutputs] = useState<any>([]);
 
-/*     const [example_count,setExample_count] = useState<any[]>([
+    const [example_count,setExample_count] = useState<any[]>([
         {name:"Default",count:0},
         { name:"0", count:0}, { name:"1", count:0},{ name:"2", count:0},{ name:"3", count:0},
          { name:"4", count:0}, { name:"5", count:0} ,{ name:"6", count:0},{ name:"7", count:0},
@@ -29,16 +29,16 @@ const Hp = () => {
 
     ]);
 
-    let class_names = ["default", "0","1","2","3","4","5", "6","7","8","9","*","+","-","/","=","cln"]; */
+    let class_names = ["default", "0","1","2","3","4","5", "6","7","8","9","*","+","-","/","=","cln"];
 
-    const [example_count,setExample_count] = useState<any[]>([
+/*     const [example_count,setExample_count] = useState<any[]>([
         {name:"Default",count:0},
         { name:"0", count:0}, { name:"1", count:0},{ name:"2", count:0},{ name:"3", count:0},
          { name:"4", count:0}, { name:"5", count:0} ,{ name:"6", count:0},{ name:"7", count:0},
         { name:"8", count:0},{ name:"9", count:0},
     ]);
 
-    let class_names = ["default", "0","1","2","3","4","5", "6","7","8","9"];
+    let class_names = ["default", "0","1","2","3","4","5", "6","7","8","9"]; */
 
     const [predict, setPredict] = useState(false);
 
@@ -135,10 +135,11 @@ const Hp = () => {
 
     const volume = class_names.length;
     const [aval, setAval] = useState(false);
+
     useEffect(()=>{
         const load_existing_model = async () =>{
             try{
-                const existing_model = await tf.loadLayersModel('localstorage://numbers');
+                const existing_model = await tf.loadLayersModel('localstorage://whole');
                 if(existing_model){
                     setModel(existing_model);
                     console.log("model avaiaible");
@@ -162,6 +163,18 @@ const Hp = () => {
             }
         }
         load_existing_model();
+/*         let modd = tf.sequential();
+        modd.add(tf.layers.dense({inputShape:[1024],units:450,activation:"relu"}));
+        modd.add(tf.layers.dense({units:volume,activation:"softmax"}));
+        modd.summary();
+
+        modd.compile({
+            optimizer:"adam",
+            loss:(class_names.length === volume) ? "binaryCrossentropy" : "categoricalCrossentropy",
+            metrics:["accuracy"]
+        });
+        setModel(modd); */
+        
     },[])
 
     const trainAndPredict = async () =>{
@@ -196,11 +209,20 @@ const Hp = () => {
         console.log('Model saved:', saveResult);
       }
 
+    const saveWhole_model = async () => {
+        const saveResult = await model.save('localstorage://whole');
+        console.log('Model saved:', saveResult);
+      }
 
     const [result,setResult] = useState<any>();
-    const _90 = ["-","+","/","*","cln"];
+    const _ops = ["-","+","/","*","cln"];
     
-    const _85 = ["5","6","8"];
+    const _95 = ["5"];
+    const _85 = ["7"];
+    const _80 = ["0","6","8","*","/","+","=","cln"];
+    const _70 = ["1","2","9"];
+    const _50 = ["3","4","-"];
+
 
 
 
@@ -214,8 +236,12 @@ const Hp = () => {
                 let prediction = model.predict(image_features).squeeze();
                 let heighestIndex = prediction.argMax().arraySync();
                 let predictionArray = prediction.arraySync();
-                const selective_percentage = _85.includes(class_names[heighestIndex]) ? 85
-                                            : 65;
+                const selective_percentage = _95.includes(class_names[heighestIndex]) ? 95
+                                            : _85.includes(class_names[heighestIndex]) ? 85
+                                            : _80.includes(class_names[heighestIndex]) ? 80
+                                            : _70.includes(class_names[heighestIndex]) ? 70
+                                            : _50.includes(class_names[heighestIndex]) ? 50
+                                            : 55;
 
                 if(predictionArray[heighestIndex]*100 > selective_percentage){
                     setResult({
@@ -242,16 +268,16 @@ const Hp = () => {
         }
         if(last_number !== "default"){
             setTimeout(() => {
-                if(_90.includes(last_number!) && _90.includes(ins[ins.length-1])){
+                if(_ops.includes(last_number!) && _ops.includes(ins[ins.length-1])){
                     setIns(ins.map((e:any,i:any)=> i === ins.length-1 ? last_number : e));
                 }
                 else if(last_number === "="){
-                    if(_90.includes(ins[ins.length-1]) || ins.length === 0 || !ins.some((item:any) => _90.includes(item))){
+                    if(_ops.includes(ins[ins.length-1]) || ins.length === 0 || !ins.some((item:any) => _90.includes(item))){
                         return;
                     }
                     else{
                         const united = ins.join("");
-                        const operator = ins.find((e:any)=>_90.includes(e));
+                        const operator = ins.find((e:any)=>_ops.includes(e));
                         const first = parseInt(united.split(operator)[0]); 
                         const second = parseInt(united.split(operator)[1]); 
                     
@@ -266,7 +292,7 @@ const Hp = () => {
                     setIns([]);
                 }
                 else{
-                    if(_90.includes(last_number!) && ins.some((item:any) => _90.includes(item))){
+                    if(_ops.includes(last_number!) && ins.some((item:any) => _ops.includes(item))){
                         return
                     }
                     else{
@@ -300,7 +326,7 @@ const Hp = () => {
                                     <span key={i}>{e}</span>
                                 )
                             }
-                            {final_output && final_output}
+                            {/* {final_output && final_output} */}
                             </div>                            
                     </div>
                 </div>
@@ -336,7 +362,8 @@ const Hp = () => {
                         </div>
 
                         <button onClick={()=>setIns([])}>Clear board</button>
-                        <button onClick={saveModel}>Save model</button>
+                        {/* <button onClick={saveModel}>Save numbers model</button> */}
+                        <button onClick={saveWhole_model}>Save whole model</button>
                     </>
                     : null
                 }
